@@ -6,7 +6,9 @@
     <title>ใบกำกับภาษี / ใบเสร็จรับเงิน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big.js/6.2.1/big.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- เปลี่ยนมาใช้ Library 2 ตัวนี้แทน เพื่อบังคับควบคุมสัดส่วนหน้ากระดาษให้เป็น 1 หน้า 100% -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -38,8 +40,7 @@
 </head>
 <body class="py-8">
 
-    <div class="max-w-[210mm] mx-auto mb-4 no-print flex justify-end gap-2">
-        <!-- ปุ่มล้างข้อมูล (เคลียร์บิลเพื่อทำใบใหม่) -->
+    <div class="max-w-[794px] mx-auto mb-4 no-print flex justify-end gap-2 px-2">
         <button id="clearBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow flex items-center gap-2 transition font-semibold">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -55,199 +56,203 @@
         </button>
     </div>
 
-    <!-- ล็อกขนาดกระดาษ 210mm x 297mm และซ่อนส่วนที่เกิน (overflow: hidden) เพื่อกันไม่ให้ล้นไปหน้าสอง -->
-    <div class="print-container mx-auto bg-white p-[15mm] shadow-lg relative flex flex-col" style="width: 210mm; height: 297mm; overflow: hidden; box-sizing: border-box; background-color: white;">
-        
-        <div class="flex justify-between items-start w-full">
-            <div class="flex items-start gap-8">
-                <div class="w-32 h-32 flex-shrink-0">
-                    <img src="https://i.postimg.cc/RZtYWRdR/Screenshot-2026-02-22-130417.png" alt="โลโก้ร้าน" crossorigin="anonymous" class="w-full h-full object-contain object-left-top">
-                </div>
-                <div class="pt-3 text-black">
-                    <h1 class="text-[30px] font-bold mb-3 leading-none">ร้านขนมเปี๊ยะกาหลง</h1>
-                    <p class="text-[15px] mb-1">สำนักงานใหญ่ : 448 หมู่ที่ 6 ต.อินทร์บุรี อ.อินทร์บุรี จ.สิงห์บุรี 16110</p>
-                    <p class="text-[15px]">โทร. 096-296-9628 <span class="ml-4">เลขประจำตัวผู้เสียภาษี 3170600571436</span></p>
-                </div>
-            </div>
-            <div class="text-xl font-bold text-black pt-3">
-                ต้นฉบับ
-            </div>
-        </div>
-
-        <div class="mt-4 mb-6 text-black text-center">
-            <h2 class="text-[28px] font-bold leading-none">ใบกำกับภาษี / ใบเสร็จรับเงิน</h2>
-            <h3 class="text-[16px] font-bold tracking-wider mt-2">TAX INVOICE / RECEIPT</h3>
-        </div>
-
-        <div class="flex justify-between items-start mb-4 text-sm gap-4">
-            <div class="flex-1 border border-gray-700 p-3 rounded-none">
-                <div class="flex mb-1">
-                    <div class="w-24 font-bold">นามลูกค้า :</div>
-                    <input type="text" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="บริษัท บิ๊กมอลล์พลัส (ประเทศไทย) จำกัด">
-                </div>
-                <div class="flex mb-1">
-                    <div class="w-24 font-bold">ที่อยู่ :</div>
-                    <input type="text" class="flex-1 leading-snug text-[#0000FF] bg-transparent outline-none w-full" value="4/11 หมู่ที่ 1 ต.คูคต อ.ลำลูกกา จ.ปทุมธานี 12130">
-                </div>
-                <div class="flex mb-1">
-                    <div class="w-24 font-bold">โทรศัพท์ :</div>
-                    <input type="text" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="095-693-6721">
-                </div>
-                <div class="flex mt-2 items-center">
-                    <div class="w-auto font-bold mr-2">เลขประจำตัวผู้เสียภาษี :</div>
-                    <input type="text" class="w-32 tracking-widest text-[#0000FF] bg-transparent outline-none" value="135567002521">
-                    <div class="flex items-center mr-3 ml-2">
-                        <div class="w-4 h-4 border border-black flex items-center justify-center mr-1 text-xs text-black">X</div>
-                        <span>สำนักงานใหญ่</span>
-                    </div>
-                    <div class="flex items-center">
-                        <div class="w-4 h-4 border border-black mr-1"></div>
-                        <span>สาขาที่ ............</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-64 border border-gray-700 p-3 rounded-none h-full">
-                <div class="flex mb-2 items-center">
-                    <div class="w-16 font-bold">เลขที่ :</div>
-                    <input type="text" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="po#16322">
-                </div>
-                <div class="flex mb-2 items-center">
-                    <div class="w-16 font-bold">วันที่ :</div>
-                    <input type="text" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="2569-02-09">
-                </div>
-            </div>
-        </div>
-
-        <table class="w-full text-sm border-collapse border-table mb-4 flex-1">
-            <thead>
-                <tr class="bg-[#FF0000] text-center font-bold text-white">
-                    <th class="w-12">ลำดับ</th>
-                    <th class="w-20">รหัสสินค้า</th>
-                    <th>รายละเอียด</th>
-                    <th class="w-16">จำนวน</th>
-                    <th class="w-16">หน่วย</th>
-                    <th class="w-28">ราคา/หน่วย</th>
-                    <th class="w-32">จำนวนเงิน</th>
-                </tr>
-            </thead>
-            <tbody id="invoice-items">
-                <tr class="align-top h-8 text-black item-row">
-                    <td class="text-center"><input type="text" class="text-center" value="1"></td>
-                    <td class="text-center"><input type="text" class="text-center" value="ด032"></td>
-                    <td><input type="text" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
-                    <td class="text-center"><input type="text" class="item-qty text-center" value="1,000"></td>
-                    <td class="text-center"><input type="text" class="text-center" value="ชิ้น"></td>
-                    <td class="text-right"><input type="text" class="item-price text-right" value="41.86915"></td>
-                    <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black" value=""></td>
-                </tr>
-                <tr class="align-top h-8 text-black item-row">
-                    <td class="text-center"><input type="text" class="text-center" value="2"></td>
-                    <td class="text-center"><input type="text" class="text-center" value="ด033"></td>
-                    <td><input type="text" value="เปี๊ยะไข่ระเบิด ไส้ถั่วล้วนไข่"></td>
-                    <td class="text-center"><input type="text" class="item-qty text-center" value=""></td>
-                    <td class="text-center"><input type="text" class="text-center" value=""></td>
-                    <td class="text-right"><input type="text" class="item-price text-right" value=""></td>
-                    <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black" value=""></td>
-                </tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-            </tbody>
+    <!-- สร้างกล่องลากเลื่อน (overflow) เพื่อไม่ให้มือถือย่อขนาดกระดาษจนเพี้ยน -->
+    <div class="w-full overflow-x-auto pb-8">
+        <!-- ล็อกขนาดกระดาษ 794px x 1123px (A4 พอดีเป๊ะ) และไม่ให้โดนบีบ (shrink-0) -->
+        <div class="print-container mx-auto bg-white shadow-lg relative flex flex-col shrink-0" style="width: 794px; height: 1123px; padding: 56px; overflow: hidden; box-sizing: border-box; background-color: white;">
             
-            <tbody>
-                <tr>
-                    <td colspan="5" rowspan="5" style="padding: 0; vertical-align: top;">
-                        <div class="flex flex-col h-full bg-white text-black">
-                            <div class="flex border-b border-[#1f2937] p-2 items-center">
-                                <span class="font-bold mr-2 text-sm">ตัวอักษร.</span>
-                                <span class="flex-1 text-center font-bold text-[13px] baht-text-val">(=ศูนย์บาทถ้วน=)</span>
-                            </div>
-                            <div class="p-3 flex-1 flex flex-col justify-between text-[13px] leading-relaxed">
-                                <div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 border border-black mr-2"></div>
-                                        <span>เงินสด</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 border border-black mr-2"></div>
-                                        <span>เงินโอนเข้าบัญชี ........................................................................</span>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <div class="w-3 h-3 border border-black mr-2"></div>
-                                        <span>เช็คเลขที่......................................   ธนาคาร............................................</span>
-                                    </div>
-                                    <div class="flex items-center pl-5">
-                                        <span>วันที่..............................................   จำนวนเงิน.........................................</span>
-                                    </div>
-                                </div>
-                                <div class="mt-2 text-[12px] leading-tight">
-                                    <span class="font-bold">หมายเหตุ :</span><br>
-                                    <span>1. สินค้าตามรายการข้างต้นแม้จะได้ส่งมอบให้แก่ผู้ซื้อแล้วก็ยังคงเป็นทรัพย์สินของผู้ขายจนกว่าผู้ซื้อจะได้ชำระเงินเรียบร้อยแล้ว</span>
-                                </div>
-                            </div>
+            <div class="flex justify-between items-start w-full">
+                <div class="flex items-start gap-8">
+                    <div class="w-32 h-32 flex-shrink-0">
+                        <img src="https://i.postimg.cc/RZtYWRdR/Screenshot-2026-02-22-130417.png" alt="โลโก้ร้าน" crossorigin="anonymous" class="w-full h-full object-contain object-left-top">
+                    </div>
+                    <div class="pt-3 text-black">
+                        <h1 class="text-[30px] font-bold mb-3 leading-tight">ร้านขนมเปี๊ยะกาหลง</h1>
+                        <p class="text-[15px] mb-1 leading-normal">สำนักงานใหญ่ : 448 หมู่ที่ 6 ต.อินทร์บุรี อ.อินทร์บุรี จ.สิงห์บุรี 16110</p>
+                        <p class="text-[15px] leading-normal">โทร. 096-296-9628 <span class="ml-4">เลขประจำตัวผู้เสียภาษี 3170600571436</span></p>
+                    </div>
+                </div>
+                <div class="text-xl font-bold text-black pt-3">
+                    ต้นฉบับ
+                </div>
+            </div>
+
+            <div class="mt-4 mb-6 text-black text-center">
+                <h2 class="text-[28px] font-bold leading-tight">ใบกำกับภาษี / ใบเสร็จรับเงิน</h2>
+                <h3 class="text-[16px] font-bold tracking-wider mt-2 leading-tight">TAX INVOICE / RECEIPT</h3>
+            </div>
+
+            <div class="flex justify-between items-start mb-4 text-sm gap-4">
+                <div class="flex-1 border border-gray-700 p-3 rounded-none">
+                    <div class="flex mb-1">
+                        <div class="w-24 font-bold">นามลูกค้า :</div>
+                        <input type="text" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="บริษัท บิ๊กมอลล์พลัส (ประเทศไทย) จำกัด">
+                    </div>
+                    <div class="flex mb-1">
+                        <div class="w-24 font-bold">ที่อยู่ :</div>
+                        <input type="text" class="flex-1 leading-snug text-[#0000FF] bg-transparent outline-none w-full" value="4/11 หมู่ที่ 1 ต.คูคต อ.ลำลูกกา จ.ปทุมธานี 12130">
+                    </div>
+                    <div class="flex mb-1">
+                        <div class="w-24 font-bold">โทรศัพท์ :</div>
+                        <input type="text" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="095-693-6721">
+                    </div>
+                    <div class="flex mt-2 items-center">
+                        <div class="w-auto font-bold mr-2">เลขประจำตัวผู้เสียภาษี :</div>
+                        <input type="text" class="w-32 tracking-widest text-[#0000FF] bg-transparent outline-none" value="135567002521">
+                        <div class="flex items-center mr-3 ml-2">
+                            <div class="w-4 h-4 border border-black flex items-center justify-center mr-1 text-xs text-black">X</div>
+                            <span>สำนักงานใหญ่</span>
                         </div>
-                    </td>
-                    <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">รวมเงิน <br><span class="text-[10px] font-normal">TOTAL AMOUNT</span></td>
-                    <td class="font-bold text-right px-2 py-1 text-black bg-white align-middle subtotal-val">0.00</td>
-                </tr>
-                <tr>
-                    <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight whitespace-pre">&nbsp;&nbsp;&nbsp;หัก เงินมัดจำ <br>&nbsp;&nbsp;&nbsp;DEPOSIT</td>
-                    <td class="text-right px-2 py-1 text-black bg-white align-middle"><input type="text" class="deposit-val text-right" placeholder="0.00" value=""></td>
-                </tr>
-                <tr>
-                    <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">มูลค่าสินค้าหลังหักเงินมัดจำ <br><span class="text-[10px] font-normal">TOTAL AMOUNT AFTER DEPOSIT</span></td>
-                    <td class="font-bold text-right px-2 py-1 text-black bg-white align-middle after-deposit-val">0.00</td>
-                </tr>
-                <tr>
-                    <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">ภาษีมูลค่าเพิ่ม (7%)<br><span class="text-[10px] font-normal">VAT</span></td>
-                    <td class="font-bold text-right px-2 py-1 text-black bg-white align-middle vat-val">0.00</td>
-                </tr>
-                <tr class="bg-gray-100">
-                    <td class="font-bold text-[13px] px-2 py-1 text-black align-middle leading-tight">ยอดเงินสุทธิ <br><span class="text-[10px] font-normal">GRAND TOTAL</span></td>
-                    <td class="font-bold text-right px-2 py-1 text-black align-middle text-lg underline double grand-total-val">0.00</td>
-                </tr>
-            </tbody>
-        </table>
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 border border-black mr-1"></div>
+                            <span>สาขาที่ ............</span>
+                        </div>
+                    </div>
+                </div>
 
-        <!-- ลายเซ็นต์ -->
-        <div class="grid grid-cols-3 gap-8 mt-4 text-[13px] text-center text-black items-end">
-            <!-- 1. ผู้รับสินค้า -->
-            <div class="flex flex-col items-center px-2 w-full">
-                <div class="mb-3 leading-tight text-gray-800">ได้รับสินค้าตามรายการข้างต้น<br>ไว้ในสภาพเรียบร้อยถูกต้อง</div>
-                <div class="w-full relative h-10 mb-2">
-                    <div class="absolute bottom-0 w-full border-b border-black"></div>
-                </div>
-                <div class="h-[20px] flex items-center justify-center whitespace-nowrap">ผู้รับสินค้า / Receiver</div>
-                <div class="text-xs text-gray-600 mt-1 h-[18px] flex items-center justify-center">วันที่ / Date ......./......./.......</div>
-            </div>
-            
-            <!-- 2. ผู้ส่งสินค้า -->
-            <div class="flex flex-col items-center px-2 w-full">
-                <div class="w-full relative h-10 mb-2">
-                    <div class="absolute bottom-0 w-full border-b border-black"></div>
-                    <img src="https://i.postimg.cc/8ktcYdh0/10101010.png" alt="ลายเซ็นผู้ส่ง" crossorigin="anonymous" class="absolute bottom-0 left-1/2 -translate-x-1/2 max-h-16 object-contain">
-                </div>
-                <div class="h-[20px] flex items-center justify-center whitespace-nowrap">ผู้ส่งสินค้า / Delivered By</div>
-                <div class="text-xs text-gray-600 mt-1 h-[18px] flex items-center justify-center w-full">
-                    <span>วันที่ / Date&nbsp;</span>
-                    <input type="text" class="w-24 bg-transparent outline-none text-center" value="......./......./.......">
+                <div class="w-64 border border-gray-700 p-3 rounded-none h-full">
+                    <div class="flex mb-2 items-center">
+                        <div class="w-16 font-bold">เลขที่ :</div>
+                        <input type="text" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="po#16322">
+                    </div>
+                    <div class="flex mb-2 items-center">
+                        <div class="w-16 font-bold">วันที่ :</div>
+                        <input type="text" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="2569-02-09">
+                    </div>
                 </div>
             </div>
-            
-            <!-- 3. ผู้มีอำนาจลงนาม -->
-            <div class="flex flex-col items-center px-2 w-full">
-                <div class="w-full relative h-10 mb-2">
-                    <div class="absolute bottom-0 w-full border-b border-black"></div>
-                    <img src="https://i.postimg.cc/8ktcYdh0/10101010.png" alt="ลายเซ็นผู้มีอำนาจลงนาม" crossorigin="anonymous" class="absolute bottom-0 left-1/2 -translate-x-1/2 max-h-16 object-contain">
+
+            <table class="w-full text-sm border-collapse border-table mb-4 flex-1">
+                <thead>
+                    <tr class="bg-[#FF0000] text-center font-bold text-white leading-tight">
+                        <th class="w-12 py-1">ลำดับ</th>
+                        <th class="w-20 py-1">รหัสสินค้า</th>
+                        <th class="py-1">รายละเอียด</th>
+                        <th class="w-16 py-1">จำนวน</th>
+                        <th class="w-16 py-1">หน่วย</th>
+                        <th class="w-28 py-1">ราคา/หน่วย</th>
+                        <th class="w-32 py-1">จำนวนเงิน</th>
+                    </tr>
+                </thead>
+                <tbody id="invoice-items">
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" class="text-center leading-tight" value="1"></td>
+                        <td class="text-center"><input type="text" class="text-center leading-tight" value="ด032"></td>
+                        <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
+                        <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value="1,000"></td>
+                        <td class="text-center"><input type="text" class="text-center leading-tight" value="ชิ้น"></td>
+                        <td class="text-right"><input type="text" class="item-price text-right leading-tight" value="41.86915"></td>
+                        <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
+                    </tr>
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" class="text-center leading-tight" value="2"></td>
+                        <td class="text-center"><input type="text" class="text-center leading-tight" value="ด033"></td>
+                        <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วล้วนไข่"></td>
+                        <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value=""></td>
+                        <td class="text-center"><input type="text" class="text-center leading-tight" value=""></td>
+                        <td class="text-right"><input type="text" class="item-price text-right leading-tight" value=""></td>
+                        <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
+                    </tr>
+                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                </tbody>
+                
+                <tbody>
+                    <tr>
+                        <td colspan="5" rowspan="5" style="padding: 0; vertical-align: top;">
+                            <div class="flex flex-col h-full bg-white text-black">
+                                <div class="flex border-b border-[#1f2937] p-2 items-center">
+                                    <span class="font-bold mr-2 text-sm">ตัวอักษร.</span>
+                                    <span class="flex-1 text-center font-bold text-[13px] baht-text-val leading-tight">(=ศูนย์บาทถ้วน=)</span>
+                                </div>
+                                <div class="p-3 flex-1 flex flex-col justify-between text-[13px] leading-relaxed">
+                                    <div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 border border-black mr-2"></div>
+                                            <span>เงินสด</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 border border-black mr-2"></div>
+                                            <span>เงินโอนเข้าบัญชี ........................................................................</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 border border-black mr-2"></div>
+                                            <span>เช็คเลขที่......................................   ธนาคาร............................................</span>
+                                        </div>
+                                        <div class="flex items-center pl-5">
+                                            <span>วันที่..............................................   จำนวนเงิน.........................................</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-[12px] leading-tight">
+                                        <span class="font-bold">หมายเหตุ :</span><br>
+                                        <span>1. สินค้าตามรายการข้างต้นแม้จะได้ส่งมอบให้แก่ผู้ซื้อแล้วก็ยังคงเป็นทรัพย์สินของผู้ขายจนกว่าผู้ซื้อจะได้ชำระเงินเรียบร้อยแล้ว</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">รวมเงิน <br><span class="text-[10px] font-normal">TOTAL AMOUNT</span></td>
+                        <td class="font-bold text-right px-2 py-1 text-black bg-white align-middle subtotal-val">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight whitespace-pre">&nbsp;&nbsp;&nbsp;หัก เงินมัดจำ <br>&nbsp;&nbsp;&nbsp;DEPOSIT</td>
+                        <td class="text-right px-2 py-1 text-black bg-white align-middle"><input type="text" class="deposit-val text-right leading-tight" placeholder="0.00" value=""></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">มูลค่าสินค้าหลังหักเงินมัดจำ <br><span class="text-[10px] font-normal">TOTAL AMOUNT AFTER DEPOSIT</span></td>
+                        <td class="font-bold text-right px-2 py-1 text-black bg-white align-middle after-deposit-val">0.00</td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">ภาษีมูลค่าเพิ่ม (7%)<br><span class="text-[10px] font-normal">VAT</span></td>
+                        <td class="font-bold text-right px-2 py-1 text-black bg-white align-middle vat-val">0.00</td>
+                    </tr>
+                    <tr class="bg-gray-100">
+                        <td class="font-bold text-[13px] px-2 py-1 text-black align-middle leading-tight">ยอดเงินสุทธิ <br><span class="text-[10px] font-normal">GRAND TOTAL</span></td>
+                        <td class="font-bold text-right px-2 py-1 text-black align-middle text-lg underline double grand-total-val">0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ลายเซ็นต์ -->
+            <div class="grid grid-cols-3 gap-8 mt-4 text-[13px] text-center text-black items-end pb-4">
+                <!-- 1. ผู้รับสินค้า -->
+                <div class="flex flex-col items-center px-2 w-full">
+                    <div class="mb-3 leading-tight text-gray-800">ได้รับสินค้าตามรายการข้างต้น<br>ไว้ในสภาพเรียบร้อยถูกต้อง</div>
+                    <div class="w-full relative h-10 mb-2">
+                        <div class="absolute bottom-0 w-full border-b border-black"></div>
+                    </div>
+                    <!-- ล็อคความสูงขั้นต่ำ -->
+                    <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้รับสินค้า / Receiver</div>
+                    <div class="text-xs text-gray-600 mt-1 min-h-[18px] flex items-center justify-center leading-tight">วันที่ / Date ......./......./.......</div>
                 </div>
-                <div class="h-[20px] flex items-center justify-center whitespace-nowrap">ผู้มีอำนาจลงนาม / Authorized Signature</div>
-                <div class="h-[18px] mt-1"></div>
+                
+                <!-- 2. ผู้ส่งสินค้า -->
+                <div class="flex flex-col items-center px-2 w-full">
+                    <div class="w-full relative h-10 mb-2">
+                        <div class="absolute bottom-0 w-full border-b border-black"></div>
+                        <img src="https://i.postimg.cc/8ktcYdh0/10101010.png" alt="ลายเซ็นผู้ส่ง" crossorigin="anonymous" class="absolute bottom-0 left-1/2 -translate-x-1/2 max-h-16 object-contain">
+                    </div>
+                    <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้ส่งสินค้า / Delivered By</div>
+                    <div class="text-xs text-gray-600 mt-1 min-h-[18px] flex items-center justify-center w-full leading-tight">
+                        <span>วันที่ / Date&nbsp;</span>
+                        <input type="text" class="w-24 bg-transparent outline-none text-center leading-tight" value="......./......./.......">
+                    </div>
+                </div>
+                
+                <!-- 3. ผู้มีอำนาจลงนาม -->
+                <div class="flex flex-col items-center px-2 w-full">
+                    <div class="w-full relative h-10 mb-2">
+                        <div class="absolute bottom-0 w-full border-b border-black"></div>
+                        <img src="https://i.postimg.cc/8ktcYdh0/10101010.png" alt="ลายเซ็นผู้มีอำนาจลงนาม" crossorigin="anonymous" class="absolute bottom-0 left-1/2 -translate-x-1/2 max-h-16 object-contain">
+                    </div>
+                    <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้มีอำนาจลงนาม / Authorized Signature</div>
+                    <div class="min-h-[18px] mt-1"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </div> <!-- จบกรอบเลื่อนมือถือ -->
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -258,23 +263,20 @@
             const allInputs = document.querySelectorAll('input');
             const clearBtn = document.getElementById('clearBtn');
 
-            // 1. โหลดข้อมูลที่เคยพิมพ์ไว้กลับมาแสดง
             allInputs.forEach((input, index) => {
                 const savedValue = localStorage.getItem('invoice_data_' + index);
                 if (savedValue !== null) {
                     input.value = savedValue;
                 }
-                // 2. บันทึกข้อมูลทันทีทุกครั้งที่มีการพิมพ์ (หรือแก้ไข)
                 input.addEventListener('input', () => {
                     localStorage.setItem('invoice_data_' + index, input.value);
                 });
             });
 
-            // 3. ปุ่มล้างข้อมูลทั้งหมด
             clearBtn.addEventListener('click', () => {
                 if(confirm('คุณต้องการล้างข้อมูลที่กรอกไว้ทั้งหมด เพื่อทำบิลใบใหม่ใช่หรือไม่?')) {
                     localStorage.clear();
-                    location.reload(); // รีเฟรชหน้าเว็บให้เป็นค่าเริ่มต้น
+                    location.reload(); 
                 }
             });
 
@@ -345,7 +347,7 @@
                             const amount = bQty.times(bPrice);
                             const roundedAmount = amount.round(2, Big.roundHalfUp);
                             amountInput.value = formatMoney(roundedAmount.toNumber());
-                            // บันทึกค่าที่คูณเสร็จแล้วลง LocalStorage ด้วย
+                            
                             const inputIndex = Array.from(allInputs).indexOf(amountInput);
                             localStorage.setItem('invoice_data_' + inputIndex, amountInput.value);
                         } catch(e) { amountInput.value = ''; }
@@ -391,46 +393,69 @@
             });
 
             document.querySelector('.deposit-val').addEventListener('input', calculateTotal);
-            
-            // เรียกคำนวณทั้งหมดอีกครั้งตอนโหลดหน้าจอ
             document.querySelectorAll('.item-row').forEach(row => calculateRow(row, row.querySelector('.item-qty')));
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF และ Share (ปรับบังคับให้มี 1 หน้า 100%)
+            // ระบบสร้าง PDF (บังคับ 1 แผ่น A4 100% ไม่บีบ ไม่ล้น ไม่ขาด)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
                 this.innerHTML = '⏳ กำลังเตรียมไฟล์ PDF...';
                 this.disabled = true;
 
-                document.querySelectorAll('input').forEach(input => {
-                    input.setAttribute('value', input.value);
+                const element = document.querySelector('.print-container');
+                const inputs = element.querySelectorAll('input');
+                const originalDisplays = [];
+
+                // 1. เปลี่ยน input เป็น text ธรรมดาเพื่อป้องกันซ้อนทับเวลาเซฟรูป
+                inputs.forEach((input, index) => {
+                    originalDisplays[index] = input.style.display;
+                    const span = document.createElement('span');
+                    span.className = input.className + ' pdf-temp-span block truncate px-1'; 
+                    span.style.cssText = input.style.cssText;
+                    span.textContent = input.value;
+                    input.parentNode.insertBefore(span, input);
+                    input.style.display = 'none';
                 });
 
-                const element = document.querySelector('.print-container');
-                const opt = {
-                    margin:       0,
-                    filename:     'invoice_กาหลง.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
                 try {
-                    // ใช้คำสั่ง .toPdf().get('pdf') เพื่อลบหน้ากระดาษส่วนเกินออกทั้งหมด บังคับเหลือ 1 หน้าเป๊ะ
-                    const pdfBlob = await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-                        const totalPages = pdf.internal.getNumberOfPages();
-                        for (let i = totalPages; i > 1; i--) {
-                            pdf.deletePage(i);
-                        }
-                    }).output('blob');
+                    // 2. แคปภาพหน้าจอ โดยบังคับขนาด Render ให้เป็น A4 มาตรฐานคอม (794x1123) เสมอ
+                    const canvas = await html2canvas(element, { 
+                        scale: 2, 
+                        useCORS: true, 
+                        scrollY: 0,
+                        width: 794,
+                        height: 1123,
+                        windowWidth: 794
+                    });
+
+                    // 3. นำภาพมายัดลง jsPDF
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const { jsPDF } = window.jspdf;
                     
+                    // กระดาษ A4 แนวตั้ง
+                    const pdf = new jsPDF('p', 'mm', 'a4'); 
+                    const pdfWidth = pdf.internal.pageSize.getWidth(); // ดึงความกว้าง A4 100% (210mm)
+                    const pdfHeight = pdf.internal.pageSize.getHeight(); // ดึงความสูง A4 100% (297mm)
+
+                    // 4. บังคับยัดภาพใส่กระดาษ PDF (0, 0 คือเริ่มจากมุมซ้ายบน, ตามด้วยความกว้าง/ความสูงเต็มแผ่น)
+                    // **วิธีนี้รับประกัน 1 ล้านเปอร์เซ็นต์ว่าจะมีแค่ 1 หน้ากระดาษเท่านั้น ไม่มีล้นไปแผ่นสองครับ**
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                    
+                    const pdfBlob = pdf.output('blob');
                     const file = new File([pdfBlob], "invoice_กาหลง.pdf", { type: 'application/pdf' });
+                    
+                    // คืนค่าหน้าจอกลับให้กลับมาแก้ไขต่อได้
+                    element.querySelectorAll('.pdf-temp-span').forEach(span => span.remove());
+                    inputs.forEach((input, index) => {
+                        input.style.display = originalDisplays[index];
+                    });
                     
                     this.innerHTML = originalText;
                     this.disabled = false;
 
+                    // 5. ระบบแชร์ / ดาวน์โหลด
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
@@ -451,6 +476,12 @@
                 } catch (error) {
                     console.error('Error:', error);
                     alert('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF');
+                    
+                    element.querySelectorAll('.pdf-temp-span').forEach(span => span.remove());
+                    inputs.forEach((input, index) => {
+                        input.style.display = originalDisplays[index];
+                    });
+
                     this.innerHTML = originalText;
                     this.disabled = false;
                 }
