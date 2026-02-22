@@ -55,7 +55,8 @@
         </button>
     </div>
 
-    <div class="print-container w-[210mm] max-w-[210mm] mx-auto bg-white p-[15mm] shadow-lg relative min-h-[297mm] flex flex-col">
+    <!-- ล็อกขนาดกระดาษ 210mm x 297mm และซ่อนส่วนที่เกิน (overflow: hidden) เพื่อกันไม่ให้ล้นไปหน้าสอง -->
+    <div class="print-container mx-auto bg-white p-[15mm] shadow-lg relative flex flex-col" style="width: 210mm; height: 297mm; overflow: hidden; box-sizing: border-box; background-color: white;">
         
         <div class="flex justify-between items-start w-full">
             <div class="flex items-start gap-8">
@@ -396,7 +397,7 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF และ Share 
+            // ระบบสร้าง PDF และ Share (ปรับบังคับให้มี 1 หน้า 100%)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
@@ -412,12 +413,19 @@
                     margin:       0,
                     filename:     'invoice_กาหลง.pdf',
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 try {
-                    const pdfBlob = await html2pdf().set(opt).from(element).outputPdf('blob');
+                    // ใช้คำสั่ง .toPdf().get('pdf') เพื่อลบหน้ากระดาษส่วนเกินออกทั้งหมด บังคับเหลือ 1 หน้าเป๊ะ
+                    const pdfBlob = await html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+                        const totalPages = pdf.internal.getNumberOfPages();
+                        for (let i = totalPages; i > 1; i--) {
+                            pdf.deletePage(i);
+                        }
+                    }).output('blob');
+                    
                     const file = new File([pdfBlob], "invoice_กาหลง.pdf", { type: 'application/pdf' });
                     
                     this.innerHTML = originalText;
