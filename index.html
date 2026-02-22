@@ -6,7 +6,6 @@
     <title>ใบกำกับภาษี / ใบเสร็จรับเงิน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big.js/6.2.1/big.min.js"></script>
-    <!-- เปลี่ยนมาใช้ Library 2 ตัวนี้แทน เพื่อบังคับควบคุมสัดส่วนหน้ากระดาษให้เป็น 1 หน้า 100% -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -56,9 +55,7 @@
         </button>
     </div>
 
-    <!-- สร้างกล่องลากเลื่อน (overflow) เพื่อไม่ให้มือถือย่อขนาดกระดาษจนเพี้ยน -->
     <div class="w-full overflow-x-auto pb-8">
-        <!-- ล็อกขนาดกระดาษ 794px x 1123px (A4 พอดีเป๊ะ) และไม่ให้โดนบีบ (shrink-0) -->
         <div class="print-container mx-auto bg-white shadow-lg relative flex flex-col shrink-0" style="width: 794px; height: 1123px; padding: 56px; overflow: hidden; box-sizing: border-box; background-color: white;">
             
             <div class="flex justify-between items-start w-full">
@@ -117,7 +114,7 @@
                     </div>
                     <div class="flex mb-2 items-center">
                         <div class="w-16 font-bold">วันที่ :</div>
-                        <input type="text" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="2569-02-09">
+                        <input type="text" id="invoice-date" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="">
                     </div>
                 </div>
             </div>
@@ -141,7 +138,7 @@
                         <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
                         <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value="1,000"></td>
                         <td class="text-center"><input type="text" class="text-center leading-tight" value="ชิ้น"></td>
-                        <td class="text-right"><input type="text" class="item-price text-right leading-tight" value="41.86915"></td>
+                        <td class="text-right"><input type="text" class="item-price text-right leading-tight" value="44.80"></td>
                         <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
                     </tr>
                     <tr class="align-middle h-8 text-black item-row">
@@ -215,20 +212,16 @@
                 </tbody>
             </table>
 
-            <!-- ลายเซ็นต์ -->
             <div class="grid grid-cols-3 gap-8 mt-4 text-[13px] text-center text-black items-end pb-4">
-                <!-- 1. ผู้รับสินค้า -->
                 <div class="flex flex-col items-center px-2 w-full">
                     <div class="mb-3 leading-tight text-gray-800">ได้รับสินค้าตามรายการข้างต้น<br>ไว้ในสภาพเรียบร้อยถูกต้อง</div>
                     <div class="w-full relative h-10 mb-2">
                         <div class="absolute bottom-0 w-full border-b border-black"></div>
                     </div>
-                    <!-- ล็อคความสูงขั้นต่ำ -->
                     <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้รับสินค้า / Receiver</div>
                     <div class="text-xs text-gray-600 mt-1 min-h-[18px] flex items-center justify-center leading-tight">วันที่ / Date ......./......./.......</div>
                 </div>
                 
-                <!-- 2. ผู้ส่งสินค้า -->
                 <div class="flex flex-col items-center px-2 w-full">
                     <div class="w-full relative h-10 mb-2">
                         <div class="absolute bottom-0 w-full border-b border-black"></div>
@@ -241,7 +234,6 @@
                     </div>
                 </div>
                 
-                <!-- 3. ผู้มีอำนาจลงนาม -->
                 <div class="flex flex-col items-center px-2 w-full">
                     <div class="w-full relative h-10 mb-2">
                         <div class="absolute bottom-0 w-full border-b border-black"></div>
@@ -252,13 +244,23 @@
                 </div>
             </div>
         </div>
-    </div> <!-- จบกรอบเลื่อนมือถือ -->
+    </div> 
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
             // ==========================================
-            // ระบบบันทึกข้อมูลอัตโนมัติ (Auto-Save LocalStorage)
+            // ตั้งค่าวันที่อัตโนมัติ (วัน เดือน ปี)
+            // ==========================================
+            const dateInput = document.getElementById('invoice-date');
+            if (dateInput && !dateInput.value) { 
+                const today = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                dateInput.value = today.toLocaleDateString('th-TH', options); 
+            }
+
+            // ==========================================
+            // ระบบบันทึกข้อมูลอัตโนมัติ
             // ==========================================
             const allInputs = document.querySelectorAll('input');
             const clearBtn = document.getElementById('clearBtn');
@@ -316,17 +318,23 @@
                     for (let i = 0; i < len; i++) {
                         let d = parseInt(s.charAt(i));
                         let pos = len - 1 - i;
-                        if (d === 0) continue;
+                        
+                        if (d === 0) {
+                            if (pos > 0 && pos % 6 === 0 && text !== "") text += "ล้าน";
+                            continue;
+                        }
+                        
                         if (pos % 6 === 1 && d === 1) text += "สิบ";
                         else if (pos % 6 === 1 && d === 2) text += "ยี่สิบ";
-                        else if (pos % 6 === 0 && d === 1 && i > 0 && s.charAt(i-1) !== '0' && len > 1) text += "เอ็ด";
+                        else if (pos % 6 === 0 && d === 1 && len > 1 && i > 0) text += "เอ็ด";
                         else text += digits[d] + units[pos % 6];
+                        
                         if (pos > 0 && pos % 6 === 0) text += "ล้าน";
                     }
                     return text;
                 };
 
-                let bahtText = parseInt(baht) > 0 ? readNum(baht) + "บาท" : "";
+                let bahtText = parseInt(baht) > 0 ? readNum(baht) + "บาท" : (parseInt(satang) > 0 ? "" : "ศูนย์บาท");
                 let satangText = parseInt(satang) > 0 ? readNum(satang) + "สตางค์" : "ถ้วน";
                 return "(= " + bahtText + satangText + " =)";
             };
@@ -359,25 +367,26 @@
 
             const calculateTotal = () => {
                 try {
-                    let subtotal = new Big(0);
+                    // แบบ VAT ใน (รวมเงินมาแล้ว แล้วค่อยถอด VAT)
+                    let grandTotalBase = new Big(0);
                     document.querySelectorAll('.item-row').forEach(row => {
                         const amountInput = row.querySelector('.item-amount');
                         const val = parseNum(amountInput.value);
-                        if(val !== 0) subtotal = subtotal.plus(new Big(val));
+                        if(val !== 0) grandTotalBase = grandTotalBase.plus(new Big(val));
                     });
 
                     const depositInput = document.querySelector('.deposit-val');
                     const deposit = new Big(parseNum(depositInput.value));
                     
-                    document.querySelector('.subtotal-val').innerText = formatMoney(subtotal.toNumber());
+                    const grandTotal = grandTotalBase.minus(deposit);
                     
-                    const afterDeposit = subtotal.minus(deposit);
+                    const vat = grandTotal.times(7).div(107).round(2, Big.roundHalfUp);
+                    
+                    const afterDeposit = grandTotal.minus(vat);
+
+                    document.querySelector('.subtotal-val').innerText = formatMoney(grandTotalBase.toNumber());
                     document.querySelector('.after-deposit-val').innerText = formatMoney(afterDeposit.toNumber());
-                    
-                    const vat = afterDeposit.times(0.07).round(2, Big.roundHalfUp);
                     document.querySelector('.vat-val').innerText = formatMoney(vat.toNumber());
-                    
-                    const grandTotal = afterDeposit.plus(vat);
                     document.querySelector('.grand-total-val').innerText = formatMoney(grandTotal.toNumber());
                     document.querySelector('.baht-text-val').innerText = formatThaiBaht(grandTotal.toNumber());
                 } catch(e) { console.error("Calculation Error:", e); }
@@ -397,7 +406,7 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF (บังคับ 1 แผ่น A4 100% ไม่บีบ ไม่ล้น ไม่ขาด)
+            // ระบบสร้าง PDF
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
@@ -408,7 +417,6 @@
                 const inputs = element.querySelectorAll('input');
                 const originalDisplays = [];
 
-                // 1. เปลี่ยน input เป็น text ธรรมดาเพื่อป้องกันซ้อนทับเวลาเซฟรูป
                 inputs.forEach((input, index) => {
                     originalDisplays[index] = input.style.display;
                     const span = document.createElement('span');
@@ -420,7 +428,6 @@
                 });
 
                 try {
-                    // 2. แคปภาพหน้าจอ โดยบังคับขนาด Render ให้เป็น A4 มาตรฐานคอม (794x1123) เสมอ
                     const canvas = await html2canvas(element, { 
                         scale: 2, 
                         useCORS: true, 
@@ -430,23 +437,18 @@
                         windowWidth: 794
                     });
 
-                    // 3. นำภาพมายัดลง jsPDF
                     const imgData = canvas.toDataURL('image/jpeg', 1.0);
                     const { jsPDF } = window.jspdf;
                     
-                    // กระดาษ A4 แนวตั้ง
                     const pdf = new jsPDF('p', 'mm', 'a4'); 
-                    const pdfWidth = pdf.internal.pageSize.getWidth(); // ดึงความกว้าง A4 100% (210mm)
-                    const pdfHeight = pdf.internal.pageSize.getHeight(); // ดึงความสูง A4 100% (297mm)
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
 
-                    // 4. บังคับยัดภาพใส่กระดาษ PDF (0, 0 คือเริ่มจากมุมซ้ายบน, ตามด้วยความกว้าง/ความสูงเต็มแผ่น)
-                    // **วิธีนี้รับประกัน 1 ล้านเปอร์เซ็นต์ว่าจะมีแค่ 1 หน้ากระดาษเท่านั้น ไม่มีล้นไปแผ่นสองครับ**
                     pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
                     
                     const pdfBlob = pdf.output('blob');
                     const file = new File([pdfBlob], "invoice_กาหลง.pdf", { type: 'application/pdf' });
                     
-                    // คืนค่าหน้าจอกลับให้กลับมาแก้ไขต่อได้
                     element.querySelectorAll('.pdf-temp-span').forEach(span => span.remove());
                     inputs.forEach((input, index) => {
                         input.style.display = originalDisplays[index];
@@ -455,7 +457,6 @@
                     this.innerHTML = originalText;
                     this.disabled = false;
 
-                    // 5. ระบบแชร์ / ดาวน์โหลด
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
