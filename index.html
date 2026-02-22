@@ -39,7 +39,6 @@
 <body class="py-8">
 
     <div class="max-w-[210mm] mx-auto mb-4 no-print flex justify-end gap-2">
-        <!-- ปุ่มล้างข้อมูล (เคลียร์บิลเพื่อทำใบใหม่) -->
         <button id="clearBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded shadow flex items-center gap-2 transition font-semibold">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
@@ -55,7 +54,7 @@
         </button>
     </div>
 
-    <!-- ล็อกขนาดกระดาษ 210mm x 297mm และซ่อนส่วนที่เกิน (overflow: hidden) เพื่อกันไม่ให้ล้นไปหน้าสอง -->
+    <!-- ล็อกขนาดกระดาษ 210mm x 297mm อย่างเข้มงวด -->
     <div class="print-container mx-auto bg-white p-[15mm] shadow-lg relative flex flex-col" style="width: 210mm; height: 297mm; overflow: hidden; box-sizing: border-box; background-color: white;">
         
         <div class="flex justify-between items-start w-full">
@@ -64,9 +63,10 @@
                     <img src="https://i.postimg.cc/RZtYWRdR/Screenshot-2026-02-22-130417.png" alt="โลโก้ร้าน" crossorigin="anonymous" class="w-full h-full object-contain object-left-top">
                 </div>
                 <div class="pt-3 text-black">
-                    <h1 class="text-[30px] font-bold mb-3 leading-none">ร้านขนมเปี๊ยะกาหลง</h1>
-                    <p class="text-[15px] mb-1">สำนักงานใหญ่ : 448 หมู่ที่ 6 ต.อินทร์บุรี อ.อินทร์บุรี จ.สิงห์บุรี 16110</p>
-                    <p class="text-[15px]">โทร. 096-296-9628 <span class="ml-4">เลขประจำตัวผู้เสียภาษี 3170600571436</span></p>
+                    <!-- ปรับ leading-tight เพื่อไม่ให้สระภาษาไทยถูกตัดหรือทับกัน -->
+                    <h1 class="text-[30px] font-bold mb-3 leading-tight">ร้านขนมเปี๊ยะกาหลง</h1>
+                    <p class="text-[15px] mb-1 leading-normal">สำนักงานใหญ่ : 448 หมู่ที่ 6 ต.อินทร์บุรี อ.อินทร์บุรี จ.สิงห์บุรี 16110</p>
+                    <p class="text-[15px] leading-normal">โทร. 096-296-9628 <span class="ml-4">เลขประจำตัวผู้เสียภาษี 3170600571436</span></p>
                 </div>
             </div>
             <div class="text-xl font-bold text-black pt-3">
@@ -75,8 +75,8 @@
         </div>
 
         <div class="mt-4 mb-6 text-black text-center">
-            <h2 class="text-[28px] font-bold leading-none">ใบกำกับภาษี / ใบเสร็จรับเงิน</h2>
-            <h3 class="text-[16px] font-bold tracking-wider mt-2">TAX INVOICE / RECEIPT</h3>
+            <h2 class="text-[28px] font-bold leading-tight">ใบกำกับภาษี / ใบเสร็จรับเงิน</h2>
+            <h3 class="text-[16px] font-bold tracking-wider mt-2 leading-tight">TAX INVOICE / RECEIPT</h3>
         </div>
 
         <div class="flex justify-between items-start mb-4 text-sm gap-4">
@@ -119,42 +119,43 @@
             </div>
         </div>
 
-        <table class="w-full text-sm border-collapse border-table mb-4 flex-1">
+        <!-- เอา flex-1 ออกเพื่อป้องกันไม่ให้ตารางยืดจนดันเอกสารล้น -->
+        <table class="w-full text-sm border-collapse border-table mb-auto">
             <thead>
-                <tr class="bg-[#FF0000] text-center font-bold text-white">
-                    <th class="w-12">ลำดับ</th>
-                    <th class="w-20">รหัสสินค้า</th>
-                    <th>รายละเอียด</th>
-                    <th class="w-16">จำนวน</th>
-                    <th class="w-16">หน่วย</th>
-                    <th class="w-28">ราคา/หน่วย</th>
-                    <th class="w-32">จำนวนเงิน</th>
+                <tr class="bg-[#FF0000] text-center font-bold text-white leading-tight">
+                    <th class="w-12 py-1">ลำดับ</th>
+                    <th class="w-20 py-1">รหัสสินค้า</th>
+                    <th class="py-1">รายละเอียด</th>
+                    <th class="w-16 py-1">จำนวน</th>
+                    <th class="w-16 py-1">หน่วย</th>
+                    <th class="w-28 py-1">ราคา/หน่วย</th>
+                    <th class="w-32 py-1">จำนวนเงิน</th>
                 </tr>
             </thead>
             <tbody id="invoice-items">
-                <tr class="align-top h-8 text-black item-row">
-                    <td class="text-center"><input type="text" class="text-center" value="1"></td>
-                    <td class="text-center"><input type="text" class="text-center" value="ด032"></td>
-                    <td><input type="text" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
-                    <td class="text-center"><input type="text" class="item-qty text-center" value="1,000"></td>
-                    <td class="text-center"><input type="text" class="text-center" value="ชิ้น"></td>
-                    <td class="text-right"><input type="text" class="item-price text-right" value="41.86915"></td>
-                    <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black" value=""></td>
+                <tr class="align-middle h-8 text-black item-row">
+                    <td class="text-center"><input type="text" class="text-center leading-tight" value="1"></td>
+                    <td class="text-center"><input type="text" class="text-center leading-tight" value="ด032"></td>
+                    <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
+                    <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value="1,000"></td>
+                    <td class="text-center"><input type="text" class="text-center leading-tight" value="ชิ้น"></td>
+                    <td class="text-right"><input type="text" class="item-price text-right leading-tight" value="41.86915"></td>
+                    <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
                 </tr>
-                <tr class="align-top h-8 text-black item-row">
-                    <td class="text-center"><input type="text" class="text-center" value="2"></td>
-                    <td class="text-center"><input type="text" class="text-center" value="ด033"></td>
-                    <td><input type="text" value="เปี๊ยะไข่ระเบิด ไส้ถั่วล้วนไข่"></td>
-                    <td class="text-center"><input type="text" class="item-qty text-center" value=""></td>
-                    <td class="text-center"><input type="text" class="text-center" value=""></td>
-                    <td class="text-right"><input type="text" class="item-price text-right" value=""></td>
-                    <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black" value=""></td>
+                <tr class="align-middle h-8 text-black item-row">
+                    <td class="text-center"><input type="text" class="text-center leading-tight" value="2"></td>
+                    <td class="text-center"><input type="text" class="text-center leading-tight" value="ด033"></td>
+                    <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วล้วนไข่"></td>
+                    <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value=""></td>
+                    <td class="text-center"><input type="text" class="text-center leading-tight" value=""></td>
+                    <td class="text-right"><input type="text" class="item-price text-right leading-tight" value=""></td>
+                    <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
                 </tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
-                <tr class="align-top h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td><input type="text"></td><td class="text-center"><input type="text" class="item-qty text-center"></td><td class="text-center"><input type="text" class="text-center"></td><td class="text-right"><input type="text" class="item-price text-right"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black"></td></tr>
+                <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
             </tbody>
             
             <tbody>
@@ -163,7 +164,7 @@
                         <div class="flex flex-col h-full bg-white text-black">
                             <div class="flex border-b border-[#1f2937] p-2 items-center">
                                 <span class="font-bold mr-2 text-sm">ตัวอักษร.</span>
-                                <span class="flex-1 text-center font-bold text-[13px] baht-text-val">(=ศูนย์บาทถ้วน=)</span>
+                                <span class="flex-1 text-center font-bold text-[13px] baht-text-val leading-tight">(=ศูนย์บาทถ้วน=)</span>
                             </div>
                             <div class="p-3 flex-1 flex flex-col justify-between text-[13px] leading-relaxed">
                                 <div>
@@ -195,7 +196,7 @@
                 </tr>
                 <tr>
                     <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight whitespace-pre">&nbsp;&nbsp;&nbsp;หัก เงินมัดจำ <br>&nbsp;&nbsp;&nbsp;DEPOSIT</td>
-                    <td class="text-right px-2 py-1 text-black bg-white align-middle"><input type="text" class="deposit-val text-right" placeholder="0.00" value=""></td>
+                    <td class="text-right px-2 py-1 text-black bg-white align-middle"><input type="text" class="deposit-val text-right leading-tight" placeholder="0.00" value=""></td>
                 </tr>
                 <tr>
                     <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">มูลค่าสินค้าหลังหักเงินมัดจำ <br><span class="text-[10px] font-normal">TOTAL AMOUNT AFTER DEPOSIT</span></td>
@@ -212,16 +213,17 @@
             </tbody>
         </table>
 
-        <!-- ลายเซ็นต์ -->
-        <div class="grid grid-cols-3 gap-8 mt-4 text-[13px] text-center text-black items-end">
+        <!-- ลายเซ็นต์ เปลี่ยนโครงสร้างตอกหมุดบรรทัดให้ขอบตรงกันเป๊ะ 100% -->
+        <div class="grid grid-cols-3 gap-8 mt-4 text-[13px] text-center text-black items-end pb-4">
             <!-- 1. ผู้รับสินค้า -->
             <div class="flex flex-col items-center px-2 w-full">
                 <div class="mb-3 leading-tight text-gray-800">ได้รับสินค้าตามรายการข้างต้น<br>ไว้ในสภาพเรียบร้อยถูกต้อง</div>
                 <div class="w-full relative h-10 mb-2">
                     <div class="absolute bottom-0 w-full border-b border-black"></div>
                 </div>
-                <div class="h-[20px] flex items-center justify-center whitespace-nowrap">ผู้รับสินค้า / Receiver</div>
-                <div class="text-xs text-gray-600 mt-1 h-[18px] flex items-center justify-center">วันที่ / Date ......./......./.......</div>
+                <!-- ล็อคความสูงขั้นต่ำ -->
+                <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้รับสินค้า / Receiver</div>
+                <div class="text-xs text-gray-600 mt-1 min-h-[18px] flex items-center justify-center leading-tight">วันที่ / Date ......./......./.......</div>
             </div>
             
             <!-- 2. ผู้ส่งสินค้า -->
@@ -230,10 +232,10 @@
                     <div class="absolute bottom-0 w-full border-b border-black"></div>
                     <img src="https://i.postimg.cc/8ktcYdh0/10101010.png" alt="ลายเซ็นผู้ส่ง" crossorigin="anonymous" class="absolute bottom-0 left-1/2 -translate-x-1/2 max-h-16 object-contain">
                 </div>
-                <div class="h-[20px] flex items-center justify-center whitespace-nowrap">ผู้ส่งสินค้า / Delivered By</div>
-                <div class="text-xs text-gray-600 mt-1 h-[18px] flex items-center justify-center w-full">
+                <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้ส่งสินค้า / Delivered By</div>
+                <div class="text-xs text-gray-600 mt-1 min-h-[18px] flex items-center justify-center w-full leading-tight">
                     <span>วันที่ / Date&nbsp;</span>
-                    <input type="text" class="w-24 bg-transparent outline-none text-center" value="......./......./.......">
+                    <input type="text" class="w-24 bg-transparent outline-none text-center leading-tight" value="......./......./.......">
                 </div>
             </div>
             
@@ -243,8 +245,8 @@
                     <div class="absolute bottom-0 w-full border-b border-black"></div>
                     <img src="https://i.postimg.cc/8ktcYdh0/10101010.png" alt="ลายเซ็นผู้มีอำนาจลงนาม" crossorigin="anonymous" class="absolute bottom-0 left-1/2 -translate-x-1/2 max-h-16 object-contain">
                 </div>
-                <div class="h-[20px] flex items-center justify-center whitespace-nowrap">ผู้มีอำนาจลงนาม / Authorized Signature</div>
-                <div class="h-[18px] mt-1"></div>
+                <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้มีอำนาจลงนาม / Authorized Signature</div>
+                <div class="min-h-[18px] mt-1"></div>
             </div>
         </div>
     </div>
@@ -397,23 +399,42 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF และ Share (ปรับบังคับให้มี 1 หน้า 100%)
+            // ระบบสร้าง PDF และ Share (แก้ปัญหาข้อความซ้อนทับ และหน้าล้น)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
                 this.innerHTML = '⏳ กำลังเตรียมไฟล์ PDF...';
                 this.disabled = true;
 
-                document.querySelectorAll('input').forEach(input => {
-                    input.setAttribute('value', input.value);
+                const element = document.querySelector('.print-container');
+
+                // 1. แปลง input ให้เป็น span ชั่วคราว (เพื่อไม่ให้ข้อความลอย หรือซ้อนทับตอนถ่าย PDF)
+                const inputs = element.querySelectorAll('input');
+                const originalDisplays = [];
+                inputs.forEach((input, index) => {
+                    originalDisplays[index] = input.style.display;
+                    
+                    const span = document.createElement('span');
+                    // ใส่ class block และ truncate เพื่อจัดการข้อความล้น
+                    span.className = input.className + ' pdf-temp-span block truncate px-1'; 
+                    span.style.cssText = input.style.cssText;
+                    span.textContent = input.value;
+                    
+                    input.parentNode.insertBefore(span, input);
+                    input.style.display = 'none';
                 });
 
-                const element = document.querySelector('.print-container');
+                // 2. ตั้งค่าการถ่ายภาพหน้าจอ (บังคับความกว้างหน้าจอไว้ที่ 794px หรือ A4 96dpi เสมอ)
                 const opt = {
                     margin:       0,
                     filename:     'invoice_กาหลง.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true, scrollY: 0 },
+                    image:        { type: 'jpeg', quality: 1.0 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        scrollY: 0,
+                        windowWidth: 794 
+                    },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
@@ -426,11 +447,18 @@
                         }
                     }).output('blob');
                     
+                    // 3. เปลี่ยน span กลับเป็น input หลังจากทำ PDF เสร็จ
+                    element.querySelectorAll('.pdf-temp-span').forEach(span => span.remove());
+                    inputs.forEach((input, index) => {
+                        input.style.display = originalDisplays[index];
+                    });
+                    
                     const file = new File([pdfBlob], "invoice_กาหลง.pdf", { type: 'application/pdf' });
                     
                     this.innerHTML = originalText;
                     this.disabled = false;
 
+                    // 4. ระบบส่งแชร์
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
@@ -451,6 +479,13 @@
                 } catch (error) {
                     console.error('Error:', error);
                     alert('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF');
+                    
+                    // หากเกิด Error ก็ต้องคืนค่า input กลับมาด้วย
+                    element.querySelectorAll('.pdf-temp-span').forEach(span => span.remove());
+                    inputs.forEach((input, index) => {
+                        input.style.display = originalDisplays[index];
+                    });
+
                     this.innerHTML = originalText;
                     this.disabled = false;
                 }
