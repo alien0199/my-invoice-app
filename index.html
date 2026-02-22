@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big.js/6.2.1/big.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/thai-baht-text@1.0.3/thai-baht-text.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -15,6 +16,26 @@
             background-color: #f3f4f6;
             color: #1f2937;
         }
+        
+        /* เพิ่มเอฟเฟกต์ให้ช่อง Input ดูเรียบหรูและใช้งานง่ายบนหน้าจอ */
+        @media screen {
+            input {
+                transition: all 0.2s ease-in-out;
+                border-radius: 4px;
+                padding: 2px 4px;
+            }
+            input:hover {
+                background-color: rgba(0, 0, 0, 0.04);
+            }
+            input:focus {
+                background-color: #f0f9ff;
+                outline: 1px solid #3b82f6;
+            }
+            .print-container {
+                border-radius: 8px;
+            }
+        }
+
         @media print {
             body { background-color: white; }
             .no-print { display: none; }
@@ -83,19 +104,19 @@
                 <div class="flex-1 border border-gray-700 p-3 rounded-none">
                     <div class="flex mb-1">
                         <div class="w-24 font-bold">นามลูกค้า :</div>
-                        <input type="text" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="บริษัท บิ๊กมอลล์พลัส (ประเทศไทย) จำกัด">
+                        <input type="text" id="cust-name" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="บริษัท บิ๊กมอลล์พลัส (ประเทศไทย) จำกัด">
                     </div>
                     <div class="flex mb-1">
                         <div class="w-24 font-bold">ที่อยู่ :</div>
-                        <input type="text" class="flex-1 leading-snug text-[#0000FF] bg-transparent outline-none w-full" value="4/11 หมู่ที่ 1 ต.คูคต อ.ลำลูกกา จ.ปทุมธานี 12130">
+                        <input type="text" id="cust-addr" class="flex-1 leading-snug text-[#0000FF] bg-transparent outline-none w-full" value="4/11 หมู่ที่ 1 ต.คูคต อ.ลำลูกกา จ.ปทุมธานี 12130">
                     </div>
                     <div class="flex mb-1">
                         <div class="w-24 font-bold">โทรศัพท์ :</div>
-                        <input type="text" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="095-693-6721">
+                        <input type="text" id="cust-tel" class="flex-1 text-[#0000FF] bg-transparent outline-none w-full" value="095-693-6721">
                     </div>
                     <div class="flex mt-2 items-center">
                         <div class="w-auto font-bold mr-2">เลขประจำตัวผู้เสียภาษี :</div>
-                        <input type="text" class="w-32 tracking-widest text-[#0000FF] bg-transparent outline-none" value="135567002521">
+                        <input type="text" id="cust-taxid" class="w-32 tracking-widest text-[#0000FF] bg-transparent outline-none" value="135567002521">
                         <div class="flex items-center mr-3 ml-2">
                             <div class="w-4 h-4 border border-black flex items-center justify-center mr-1 text-xs text-black">X</div>
                             <span>สำนักงานใหญ่</span>
@@ -110,7 +131,7 @@
                 <div class="w-64 border border-gray-700 p-3 rounded-none h-full">
                     <div class="flex mb-2 items-center">
                         <div class="w-16 font-bold">เลขที่ :</div>
-                        <input type="text" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="po#16322">
+                        <input type="text" id="inv-no" class="flex-1 text-[#0000FF] font-semibold bg-transparent outline-none w-full" value="po#16322">
                     </div>
                     <div class="flex mb-2 items-center">
                         <div class="w-16 font-bold">วันที่ :</div>
@@ -133,28 +154,68 @@
                 </thead>
                 <tbody id="invoice-items">
                     <tr class="align-middle h-8 text-black item-row">
-                        <td class="text-center"><input type="text" class="text-center leading-tight" value="1"></td>
-                        <td class="text-center"><input type="text" class="text-center leading-tight" value="ด032"></td>
-                        <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
-                        <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value="1,000"></td>
-                        <td class="text-center"><input type="text" class="text-center leading-tight" value="ชิ้น"></td>
-                        <td class="text-right"><input type="text" class="item-price text-right leading-tight" value="44.80"></td>
-                        <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
+                        <td class="text-center"><input type="text" id="i-no-1" class="text-center leading-tight" value="1"></td>
+                        <td class="text-center"><input type="text" id="i-code-1" class="text-center leading-tight" value="ด032"></td>
+                        <td><input type="text" id="i-desc-1" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วฟักไข่"></td>
+                        <td class="text-center"><input type="text" id="i-qty-1" class="item-qty text-center leading-tight" value="1,000"></td>
+                        <td class="text-center"><input type="text" id="i-unit-1" class="text-center leading-tight" value="ชิ้น"></td>
+                        <td class="text-right"><input type="text" id="i-price-1" class="item-price text-right leading-tight" value="44.80"></td>
+                        <td class="text-right"><input type="text" id="i-amt-1" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
                     </tr>
                     <tr class="align-middle h-8 text-black item-row">
-                        <td class="text-center"><input type="text" class="text-center leading-tight" value="2"></td>
-                        <td class="text-center"><input type="text" class="text-center leading-tight" value="ด033"></td>
-                        <td><input type="text" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วล้วนไข่"></td>
-                        <td class="text-center"><input type="text" class="item-qty text-center leading-tight" value=""></td>
-                        <td class="text-center"><input type="text" class="text-center leading-tight" value=""></td>
-                        <td class="text-right"><input type="text" class="item-price text-right leading-tight" value=""></td>
-                        <td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
+                        <td class="text-center"><input type="text" id="i-no-2" class="text-center leading-tight" value="2"></td>
+                        <td class="text-center"><input type="text" id="i-code-2" class="text-center leading-tight" value="ด033"></td>
+                        <td><input type="text" id="i-desc-2" class="leading-tight" value="เปี๊ยะไข่ระเบิด ไส้ถั่วล้วนไข่"></td>
+                        <td class="text-center"><input type="text" id="i-qty-2" class="item-qty text-center leading-tight" value=""></td>
+                        <td class="text-center"><input type="text" id="i-unit-2" class="text-center leading-tight" value=""></td>
+                        <td class="text-right"><input type="text" id="i-price-2" class="item-price text-right leading-tight" value=""></td>
+                        <td class="text-right"><input type="text" id="i-amt-2" class="item-amount text-right font-semibold text-black leading-tight" value=""></td>
                     </tr>
-                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
-                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
-                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
-                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
-                    <tr class="align-middle h-8 text-black item-row"><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td><input type="text" class="leading-tight"></td><td class="text-center"><input type="text" class="item-qty text-center leading-tight"></td><td class="text-center"><input type="text" class="text-center leading-tight"></td><td class="text-right"><input type="text" class="item-price text-right leading-tight"></td><td class="text-right"><input type="text" class="item-amount text-right font-semibold text-black leading-tight"></td></tr>
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" id="i-no-3" class="text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-code-3" class="text-center leading-tight"></td>
+                        <td><input type="text" id="i-desc-3" class="leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-qty-3" class="item-qty text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-unit-3" class="text-center leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-price-3" class="item-price text-right leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-amt-3" class="item-amount text-right font-semibold text-black leading-tight"></td>
+                    </tr>
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" id="i-no-4" class="text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-code-4" class="text-center leading-tight"></td>
+                        <td><input type="text" id="i-desc-4" class="leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-qty-4" class="item-qty text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-unit-4" class="text-center leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-price-4" class="item-price text-right leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-amt-4" class="item-amount text-right font-semibold text-black leading-tight"></td>
+                    </tr>
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" id="i-no-5" class="text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-code-5" class="text-center leading-tight"></td>
+                        <td><input type="text" id="i-desc-5" class="leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-qty-5" class="item-qty text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-unit-5" class="text-center leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-price-5" class="item-price text-right leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-amt-5" class="item-amount text-right font-semibold text-black leading-tight"></td>
+                    </tr>
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" id="i-no-6" class="text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-code-6" class="text-center leading-tight"></td>
+                        <td><input type="text" id="i-desc-6" class="leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-qty-6" class="item-qty text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-unit-6" class="text-center leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-price-6" class="item-price text-right leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-amt-6" class="item-amount text-right font-semibold text-black leading-tight"></td>
+                    </tr>
+                    <tr class="align-middle h-8 text-black item-row">
+                        <td class="text-center"><input type="text" id="i-no-7" class="text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-code-7" class="text-center leading-tight"></td>
+                        <td><input type="text" id="i-desc-7" class="leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-qty-7" class="item-qty text-center leading-tight"></td>
+                        <td class="text-center"><input type="text" id="i-unit-7" class="text-center leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-price-7" class="item-price text-right leading-tight"></td>
+                        <td class="text-right"><input type="text" id="i-amt-7" class="item-amount text-right font-semibold text-black leading-tight"></td>
+                    </tr>
                 </tbody>
                 
                 <tbody>
@@ -195,7 +256,7 @@
                     </tr>
                     <tr>
                         <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight whitespace-pre">&nbsp;&nbsp;&nbsp;หัก เงินมัดจำ <br>&nbsp;&nbsp;&nbsp;DEPOSIT</td>
-                        <td class="text-right px-2 py-1 text-black bg-white align-middle"><input type="text" class="deposit-val text-right leading-tight" placeholder="0.00" value=""></td>
+                        <td class="text-right px-2 py-1 text-black bg-white align-middle"><input type="text" id="deposit-val" class="deposit-val text-right leading-tight" placeholder="0.00" value=""></td>
                     </tr>
                     <tr>
                         <td class="font-bold text-[13px] px-2 py-1 text-black bg-white align-middle leading-tight">มูลค่าสินค้าก่อนภาษีมูลค่าเพิ่ม <br><span class="text-[10px] font-normal">TOTAL AMOUNT BEFORE VAT</span></td>
@@ -230,7 +291,7 @@
                     <div class="min-h-[20px] flex items-center justify-center whitespace-nowrap leading-tight">ผู้ส่งสินค้า / Delivered By</div>
                     <div class="text-xs text-gray-600 mt-1 min-h-[18px] flex items-center justify-center w-full leading-tight">
                         <span>วันที่ / Date&nbsp;</span>
-                        <input type="text" class="w-24 bg-transparent outline-none text-center leading-tight" value="......./......./.......">
+                        <input type="text" id="sender-date" class="w-24 bg-transparent outline-none text-center leading-tight" value="......./......./.......">
                     </div>
                 </div>
                 
@@ -260,18 +321,22 @@
             }
 
             // ==========================================
-            // ระบบบันทึกข้อมูลอัตโนมัติ
+            // ระบบบันทึกข้อมูลอัตโนมัติ (แก้ไขใช้ ID แทน Index)
             // ==========================================
             const allInputs = document.querySelectorAll('input');
             const clearBtn = document.getElementById('clearBtn');
 
             allInputs.forEach((input, index) => {
-                const savedValue = localStorage.getItem('invoice_data_' + index);
+                // อ้างอิงด้วย ID ป้องกันข้อมูลสลับช่องในอนาคต
+                const inputId = input.id || 'unnamed_input_' + index;
+                const savedValue = localStorage.getItem('invoice_data_' + inputId);
+                
                 if (savedValue !== null) {
                     input.value = savedValue;
                 }
+                
                 input.addEventListener('input', () => {
-                    localStorage.setItem('invoice_data_' + index, input.value);
+                    localStorage.setItem('invoice_data_' + inputId, input.value);
                 });
             });
 
@@ -303,42 +368,6 @@
                 return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             };
 
-            const formatThaiBaht = (num) => {
-                if (num === 0 || isNaN(num)) return "(=ศูนย์บาทถ้วน=)";
-                let numStr = Number(num).toFixed(2);
-                let parts = numStr.split('.');
-                let baht = parts[0];
-                let satang = parts[1];
-                
-                const readNum = (s) => {
-                    const digits = ["", "หนึ่ง", "สอง", "สาม", "สี่", "ห้า", "หก", "เจ็ด", "แปด", "เก้า"];
-                    const units = ["", "สิบ", "ร้อย", "พัน", "หมื่น", "แสน", "ล้าน"];
-                    let text = "";
-                    let len = s.length;
-                    for (let i = 0; i < len; i++) {
-                        let d = parseInt(s.charAt(i));
-                        let pos = len - 1 - i;
-                        
-                        if (d === 0) {
-                            if (pos > 0 && pos % 6 === 0 && text !== "") text += "ล้าน";
-                            continue;
-                        }
-                        
-                        if (pos % 6 === 1 && d === 1) text += "สิบ";
-                        else if (pos % 6 === 1 && d === 2) text += "ยี่สิบ";
-                        else if (pos % 6 === 0 && d === 1 && len > 1 && i > 0) text += "เอ็ด";
-                        else text += digits[d] + units[pos % 6];
-                        
-                        if (pos > 0 && pos % 6 === 0) text += "ล้าน";
-                    }
-                    return text;
-                };
-
-                let bahtText = parseInt(baht) > 0 ? readNum(baht) + "บาท" : (parseInt(satang) > 0 ? "" : "ศูนย์บาท");
-                let satangText = parseInt(satang) > 0 ? readNum(satang) + "สตางค์" : "ถ้วน";
-                return "(= " + bahtText + satangText + " =)";
-            };
-
             const calculateRow = (row, sourceInput) => {
                 const qtyInput = row.querySelector('.item-qty');
                 const priceInput = row.querySelector('.item-price');
@@ -356,8 +385,10 @@
                             const roundedAmount = amount.round(2, Big.roundHalfUp);
                             amountInput.value = formatMoney(roundedAmount.toNumber());
                             
-                            const inputIndex = Array.from(allInputs).indexOf(amountInput);
-                            localStorage.setItem('invoice_data_' + inputIndex, amountInput.value);
+                            // บันทึกลง Local Storage เมื่อมีการคำนวณอัตโนมัติ
+                            if (amountInput.id) {
+                                localStorage.setItem('invoice_data_' + amountInput.id, amountInput.value);
+                            }
                         } catch(e) { amountInput.value = ''; }
                     } else if (qtyStr === '' && priceStr === '') {
                         amountInput.value = '';
@@ -367,7 +398,6 @@
 
             const calculateTotal = () => {
                 try {
-                    // แบบ VAT ใน (รวมเงินมาแล้ว แล้วค่อยถอด VAT)
                     let grandTotalBase = new Big(0);
                     document.querySelectorAll('.item-row').forEach(row => {
                         const amountInput = row.querySelector('.item-amount');
@@ -379,16 +409,21 @@
                     const deposit = new Big(parseNum(depositInput.value));
                     
                     const grandTotal = grandTotalBase.minus(deposit);
-                    
                     const vat = grandTotal.times(7).div(107).round(2, Big.roundHalfUp);
-                    
                     const afterDeposit = grandTotal.minus(vat);
 
                     document.querySelector('.subtotal-val').innerText = formatMoney(grandTotalBase.toNumber());
                     document.querySelector('.after-deposit-val').innerText = formatMoney(afterDeposit.toNumber());
                     document.querySelector('.vat-val').innerText = formatMoney(vat.toNumber());
                     document.querySelector('.grand-total-val').innerText = formatMoney(grandTotal.toNumber());
-                    document.querySelector('.baht-text-val').innerText = formatThaiBaht(grandTotal.toNumber());
+                    
+                    // เรียกใช้ Library อ่านค่าเงินบาท
+                    if (grandTotal.toNumber() > 0) {
+                        document.querySelector('.baht-text-val').innerText = '(= ' + ThaiBahtText(grandTotal.toNumber()) + ' =)';
+                    } else {
+                        document.querySelector('.baht-text-val').innerText = '(=ศูนย์บาทถ้วน=)';
+                    }
+                    
                 } catch(e) { console.error("Calculation Error:", e); }
             };
 
@@ -406,7 +441,7 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF
+            // ระบบสร้าง PDF (เพิ่มสเกลให้ชัดขึ้น)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
@@ -428,13 +463,15 @@
                 });
 
                 try {
+                    // อัปเกรดความคมชัดของ PDF (Scale 3)
                     const canvas = await html2canvas(element, { 
-                        scale: 2, 
+                        scale: 3, 
                         useCORS: true, 
                         scrollY: 0,
                         width: 794,
                         height: 1123,
-                        windowWidth: 794
+                        windowWidth: 794,
+                        logging: false
                     });
 
                     const imgData = canvas.toDataURL('image/jpeg', 1.0);
@@ -491,4 +528,3 @@
     </script>
 </body>
 </html>
-
