@@ -6,7 +6,7 @@
     <title>ใบกำกับภาษี / ใบเสร็จรับเงิน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big.js/6.2.1/big.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -269,6 +269,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
+            // ==========================================
+            // ตั้งค่าวันที่อัตโนมัติ (วัน เดือน ปี)
+            // ==========================================
             const dateInput = document.getElementById('invoice-date');
             if (dateInput && !dateInput.value) { 
                 const today = new Date();
@@ -276,6 +279,9 @@
                 dateInput.value = today.toLocaleDateString('th-TH', options); 
             }
 
+            // ==========================================
+            // ระบบบันทึกข้อมูลอัตโนมัติ 
+            // ==========================================
             const allInputs = document.querySelectorAll('input');
             const clearBtn = document.getElementById('clearBtn');
 
@@ -299,6 +305,9 @@
                 }
             });
 
+            // ==========================================
+            // ฟังก์ชันแปลงตัวเลขเป็นตัวอักษรภาษาไทย (ฝังในระบบ)
+            // ==========================================
             const formatThaiBaht = (amount) => {
                 if (amount === 0 || isNaN(amount)) return "(=ศูนย์บาทถ้วน=)";
                 
@@ -338,11 +347,15 @@
                 let bText = baht > 0 ? numToWord(baht) + "บาท" : (satang > 0 ? "" : "ศูนย์บาท");
                 let sText = satang > 0 ? numToWord(satang) + "สตางค์" : "ถ้วน";
                 
+                // จัดการกรณี 101 ให้สละสลวยขึ้น
                 bText = bText.replace(/ศูนย์เอ็ด/g, "เอ็ด");
                 
                 return "(= " + bText + sText + " =)";
             };
 
+            // ==========================================
+            // ระบบคณิตศาสตร์และการคำนวณเงิน
+            // ==========================================
             const parseNum = (str) => {
                 if(!str) return 0;
                 let cleanStr = str.toString().replace(/,/g, '').trim();
@@ -409,6 +422,7 @@
                     document.querySelector('.vat-val').innerText = formatMoney(vat.toNumber());
                     document.querySelector('.grand-total-val').innerText = formatMoney(grandTotal.toNumber());
                     
+                    // อัปเดตข้อความตัวอักษรด้วยฟังก์ชันภายใน
                     document.querySelector('.baht-text-val').innerText = formatThaiBaht(grandTotal.toNumber());
                     
                 } catch(e) { console.error("Calculation Error:", e); }
@@ -428,7 +442,7 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF (แก้ปัญหาทับซ้อน 100%)
+            // ระบบสร้าง PDF
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
@@ -442,36 +456,25 @@
                 inputs.forEach((input, index) => {
                     originalDisplays[index] = input.style.display;
                     const span = document.createElement('span');
-                    
-                    // ลบคลาสที่ทำให้ข้อความเพี้ยนออก
-                    let safeClass = input.className.replace('truncate', '');
-                    span.className = safeClass + ' pdf-temp-span px-1'; 
-                    
-                    // คัดลอก Style จาก Input มา
+                    span.className = input.className + ' pdf-temp-span block truncate px-1'; 
                     span.style.cssText = input.style.cssText;
-                    
-                    // บังคับการแสดงผลให้เหมือน Input เป๊ะๆ เพื่อแก้ปัญหาทับซ้อน
-                    span.style.display = 'block';
-                    span.style.width = '100%';
-                    span.style.whiteSpace = 'nowrap'; // ห้ามปัดบรรทัดใหม่เด็ดขาด
-                    span.style.overflow = 'hidden';   // ซ่อนส่วนที่ล้นแทนที่จะปล่อยให้ทับแถวอื่น
-                    span.style.fontFamily = "'Sarabun', sans-serif"; // ย้ำฟอนต์
-                    
                     span.textContent = input.value;
                     input.parentNode.insertBefore(span, input);
                     input.style.display = 'none';
                 });
 
                 try {
-                    // บังคับรอให้ฟอนต์โหลดเสร็จสมบูรณ์จริงๆ ก่อนวาดภาพ
-                    await document.fonts.ready;
-
-                    const imgData = await htmlToImage.toJpeg(element, { 
-                        quality: 1.0,
-                        pixelRatio: 3, 
-                        backgroundColor: '#ffffff'
+                    const canvas = await html2canvas(element, { 
+                        scale: 3, 
+                        useCORS: true, 
+                        scrollY: 0,
+                        width: 794,
+                        height: 1123,
+                        windowWidth: 794,
+                        logging: false
                     });
 
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
                     const { jsPDF } = window.jspdf;
                     
                     const pdf = new jsPDF('p', 'mm', 'a4'); 
@@ -498,7 +501,7 @@
                             text: 'ส่งเอกสารใบกำกับภาษี / ใบเสร็จรับเงิน ร้านขนมเปี๊ยะกาหลง'
                         });
                     } else {
-                        alert('ระบบทำการ "ดาวน์โหลดไฟล์ PDF" ลงในเครื่องของคุณเรียบร้อยแล้ว');
+                        alert('ระบบทำการ "ดาวน์โหลดไฟล์ PDF" ลงในเครื่องของคุณเรียบร้อยแล้ว คุณสามารถนำไฟล์นี้ไปส่งใน LINE ได้เลยครับ');
                         const url = window.URL.createObjectURL(pdfBlob);
                         const a = document.createElement('a');
                         a.style.display = 'none';
