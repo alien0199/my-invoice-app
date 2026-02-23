@@ -6,8 +6,11 @@
     <title>ใบกำกับภาษี / ใบเสร็จรับเงิน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big.js/6.2.1/big.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* โครงสร้าง CSS ต้นฉบับของคุณทั้งหมด ไม่มีการแตะต้อง */
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: #f3f4f6;
@@ -20,50 +23,29 @@
                 border-radius: 4px;
                 padding: 2px 4px;
             }
-            input:hover { background-color: rgba(0, 0, 0, 0.04); }
-            input:focus { background-color: #f0f9ff; outline: 1px solid #3b82f6; }
-            .print-container { border-radius: 8px; }
-        }
-
-        /* บังคับหน้ากระดาษ A4 ไร้ขอบเบราว์เซอร์ */
-        @page {
-            size: A4 portrait;
-            margin: 0; 
+            input:hover {
+                background-color: rgba(0, 0, 0, 0.04);
+            }
+            input:focus {
+                background-color: #f0f9ff;
+                outline: 1px solid #3b82f6;
+            }
+            .print-container {
+                border-radius: 8px;
+            }
         }
 
         @media print {
-            html, body { 
-                background-color: white !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                -webkit-print-color-adjust: exact !important; /* บังคับปริ้นท์สีพื้นหลังและตารางให้ครบ */
-                print-color-adjust: exact !important;
-            }
-            .no-print { display: none !important; }
-            
-            /* ลบระยะขอบหน้าจอทิ้ง ป้องกันการโดนดันตกหน้า 2 */
-            .py-8 { padding-top: 0 !important; padding-bottom: 0 !important; }
-            .pb-8 { padding-bottom: 0 !important; }
-
+            body { background-color: white; }
+            .no-print { display: none; }
             .print-container { 
                 box-shadow: none !important; 
-                margin: 0 auto !important; 
-                width: 210mm !important;
-                height: 297mm !important;
-                padding: 48px !important; /* จัดระยะขอบให้พอดีเป๊ะเหมือนรูปที่ 2 */
-                box-sizing: border-box !important;
-                page-break-after: avoid;
-                page-break-inside: avoid;
+                margin: 0 !important; 
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
-
-            /* ปลดล็อคความสูงตาราง ป้องกันสระโดนหั่น */
-            tr.item-row { height: auto !important; }
-            tr.item-row td { padding-top: 4px !important; padding-bottom: 4px !important; }
-            
-            /* ปรับระยะห่างบรรทัดให้สระภาษาไทยไม่ซ้อนทับกัน */
-            * { line-height: 1.4 !important; }
         }
-
         .border-table th, .border-table td {
             border: 1px solid #1f2937;
             padding: 4px 8px;
@@ -446,39 +428,110 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสลับ Input เป็น Text อัตโนมัติป้องกันสระขาดตอนกด Print
+            // ระบบสร้าง PDF กลับมาใช้ html2canvas ต้นฉบับ (แก้บั๊กภาพ 1)
             // ==========================================
-            window.addEventListener('beforeprint', () => {
-                document.querySelectorAll('input').forEach(input => {
-                    const span = document.createElement('span');
-                    span.className = input.className.replace('w-full', '') + ' print-temp-text';
-                    span.style.display = 'inline-block';
-                    span.style.width = input.classList.contains('w-32') ? '8rem' : (input.classList.contains('w-24') ? '6rem' : '100%');
-                    span.style.minHeight = input.offsetHeight + 'px';
-                    span.style.lineHeight = '1.4';
-                    span.style.whiteSpace = 'nowrap';
-                    
-                    // รักษาสีฟ้าและการจัดหน้าเดิมไว้
-                    if(input.classList.contains('text-[#0000FF]')) span.style.color = '#0000FF';
-                    if(input.classList.contains('text-right')) span.style.textAlign = 'right';
-                    if(input.classList.contains('text-center')) span.style.textAlign = 'center';
+            document.getElementById('shareBtn').addEventListener('click', async function() {
+                const originalText = this.innerHTML;
+                this.innerHTML = '⏳ กำลังเตรียมไฟล์ PDF...';
+                this.disabled = true;
 
-                    span.textContent = input.value;
-                    input.parentNode.insertBefore(span, input);
+                await document.fonts.ready;
+
+                const element = document.querySelector('.print-container');
+                const inputs = element.querySelectorAll('input');
+                const originalDisplays = [];
+
+                // แปลง Input เป็น <div> ชั่วคราว (ปลดล็อคการตัดขอบสระภาษาไทย)
+                inputs.forEach((input, index) => {
+                    originalDisplays[index] = input.style.display;
+                    const div = document.createElement('div');
+                    
+                    // ดึงสไตล์เดิมมาทั้งหมด
+                    div.className = input.className + ' pdf-temp-div'; 
+                    div.style.cssText = window.getComputedStyle(input).cssText;
+                    
+                    // ปรับแต่งให้ <div> ไม่ตัดขอบสระ (แก้ปัญหาภาพที่ 1)
+                    div.style.display = 'block';
+                    div.style.width = '100%';
+                    div.style.minHeight = Math.max(input.offsetHeight, 24) + 'px'; 
+                    div.style.overflow = 'visible'; // สำคัญที่สุด! ปล่อยสระลอยได้ ไม่โดนตัด
+                    div.style.whiteSpace = 'nowrap';
+                    div.style.lineHeight = 'normal';
+                    div.style.background = 'transparent';
+                    div.style.border = 'none';
+                    div.style.outline = 'none';
+                    
+                    // รักษาสีและการจัดตำแหน่ง
+                    if(input.classList.contains('text-[#0000FF]')) div.style.color = '#0000FF';
+                    if(input.classList.contains('text-right')) div.style.textAlign = 'right';
+                    if(input.classList.contains('text-center')) div.style.textAlign = 'center';
+                    
+                    div.textContent = input.value;
+                    input.parentNode.insertBefore(div, input);
                     input.style.display = 'none';
                 });
-            });
 
-            // แปลง Text กลับมาเป็น Input ให้กรอกต่อได้หลัง Print เสร็จ
-            window.addEventListener('afterprint', () => {
-                document.querySelectorAll('.print-temp-text').forEach(span => span.remove());
-                document.querySelectorAll('input').forEach(input => {
-                    input.style.display = '';
-                });
-            });
+                try {
+                    // ใช้การดึงภาพตามที่คุณเคยใช้สำเร็จ (ขนาดจะกลับมาพอดี 1 หน้า เหมือนภาพที่ 2)
+                    const canvas = await html2canvas(element, { 
+                        scale: 2, 
+                        useCORS: true, 
+                        scrollY: 0,
+                        width: 794,
+                        height: 1123,
+                        windowWidth: 794,
+                        logging: false
+                    });
 
-            document.getElementById('shareBtn').addEventListener('click', function() {
-                window.print();
+                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                    const { jsPDF } = window.jspdf;
+                    
+                    // ตั้งค่า PDF หน้า A4 อัตราส่วนเดิม
+                    const pdf = new jsPDF('p', 'mm', 'a4'); 
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                    
+                    const pdfBlob = pdf.output('blob');
+                    const file = new File([pdfBlob], "invoice_กาหลง.pdf", { type: 'application/pdf' });
+                    
+                    // แปลงกลับคืนร่างเดิมทันที
+                    element.querySelectorAll('.pdf-temp-div').forEach(div => div.remove());
+                    inputs.forEach((input, index) => {
+                        input.style.display = originalDisplays[index];
+                    });
+                    
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+
+                    // ส่งไลน์
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'เอกสารใบกำกับภาษี',
+                            text: 'ส่งเอกสารใบกำกับภาษี / ใบเสร็จรับเงิน ร้านขนมเปี๊ยะกาหลง'
+                        });
+                    } else {
+                        const url = window.URL.createObjectURL(pdfBlob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = 'invoice_กาหลง.pdf';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF');
+                    element.querySelectorAll('.pdf-temp-div').forEach(div => div.remove());
+                    inputs.forEach((input, index) => {
+                        input.style.display = originalDisplays[index];
+                    });
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }
             });
 
         });
