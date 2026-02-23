@@ -269,9 +269,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            // ==========================================
-            // ตั้งค่าวันที่อัตโนมัติ (วัน เดือน ปี)
-            // ==========================================
             const dateInput = document.getElementById('invoice-date');
             if (dateInput && !dateInput.value) { 
                 const today = new Date();
@@ -279,9 +276,6 @@
                 dateInput.value = today.toLocaleDateString('th-TH', options); 
             }
 
-            // ==========================================
-            // ระบบบันทึกข้อมูลอัตโนมัติ 
-            // ==========================================
             const allInputs = document.querySelectorAll('input');
             const clearBtn = document.getElementById('clearBtn');
 
@@ -305,9 +299,6 @@
                 }
             });
 
-            // ==========================================
-            // ฟังก์ชันแปลงตัวเลขเป็นตัวอักษรภาษาไทย (ฝังในระบบ)
-            // ==========================================
             const formatThaiBaht = (amount) => {
                 if (amount === 0 || isNaN(amount)) return "(=ศูนย์บาทถ้วน=)";
                 
@@ -347,15 +338,11 @@
                 let bText = baht > 0 ? numToWord(baht) + "บาท" : (satang > 0 ? "" : "ศูนย์บาท");
                 let sText = satang > 0 ? numToWord(satang) + "สตางค์" : "ถ้วน";
                 
-                // จัดการกรณี 101 ให้สละสลวยขึ้น
                 bText = bText.replace(/ศูนย์เอ็ด/g, "เอ็ด");
                 
                 return "(= " + bText + sText + " =)";
             };
 
-            // ==========================================
-            // ระบบคณิตศาสตร์และการคำนวณเงิน
-            // ==========================================
             const parseNum = (str) => {
                 if(!str) return 0;
                 let cleanStr = str.toString().replace(/,/g, '').trim();
@@ -422,7 +409,6 @@
                     document.querySelector('.vat-val').innerText = formatMoney(vat.toNumber());
                     document.querySelector('.grand-total-val').innerText = formatMoney(grandTotal.toNumber());
                     
-                    // อัปเดตข้อความตัวอักษรด้วยฟังก์ชันภายใน
                     document.querySelector('.baht-text-val').innerText = formatThaiBaht(grandTotal.toNumber());
                     
                 } catch(e) { console.error("Calculation Error:", e); }
@@ -442,7 +428,7 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF (อัปเดตใหม่)
+            // ระบบสร้าง PDF (แก้ปัญหาทับซ้อน 100%)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
@@ -456,16 +442,30 @@
                 inputs.forEach((input, index) => {
                     originalDisplays[index] = input.style.display;
                     const span = document.createElement('span');
-                    // นำคำว่า truncate ออกเพื่อไม่ให้สระโดนตัดขอบ
-                    span.className = input.className.replace('truncate', '') + ' pdf-temp-span block px-1'; 
+                    
+                    // ลบคลาสที่ทำให้ข้อความเพี้ยนออก
+                    let safeClass = input.className.replace('truncate', '');
+                    span.className = safeClass + ' pdf-temp-span px-1'; 
+                    
+                    // คัดลอก Style จาก Input มา
                     span.style.cssText = input.style.cssText;
+                    
+                    // บังคับการแสดงผลให้เหมือน Input เป๊ะๆ เพื่อแก้ปัญหาทับซ้อน
+                    span.style.display = 'block';
+                    span.style.width = '100%';
+                    span.style.whiteSpace = 'nowrap'; // ห้ามปัดบรรทัดใหม่เด็ดขาด
+                    span.style.overflow = 'hidden';   // ซ่อนส่วนที่ล้นแทนที่จะปล่อยให้ทับแถวอื่น
+                    span.style.fontFamily = "'Sarabun', sans-serif"; // ย้ำฟอนต์
+                    
                     span.textContent = input.value;
                     input.parentNode.insertBefore(span, input);
                     input.style.display = 'none';
                 });
 
                 try {
-                    // ใช้ htmlToImage วาดภาพเพื่อแก้ปัญหาฟอนต์ภาษาไทยเพี้ยน
+                    // บังคับรอให้ฟอนต์โหลดเสร็จสมบูรณ์จริงๆ ก่อนวาดภาพ
+                    await document.fonts.ready;
+
                     const imgData = await htmlToImage.toJpeg(element, { 
                         quality: 1.0,
                         pixelRatio: 3, 
@@ -498,7 +498,7 @@
                             text: 'ส่งเอกสารใบกำกับภาษี / ใบเสร็จรับเงิน ร้านขนมเปี๊ยะกาหลง'
                         });
                     } else {
-                        alert('ระบบทำการ "ดาวน์โหลดไฟล์ PDF" ลงในเครื่องของคุณเรียบร้อยแล้ว คุณสามารถนำไฟล์นี้ไปส่งใน LINE ได้เลยครับ');
+                        alert('ระบบทำการ "ดาวน์โหลดไฟล์ PDF" ลงในเครื่องของคุณเรียบร้อยแล้ว');
                         const url = window.URL.createObjectURL(pdfBlob);
                         const a = document.createElement('a');
                         a.style.display = 'none';
