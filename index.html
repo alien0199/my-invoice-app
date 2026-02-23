@@ -10,13 +10,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* โครงสร้าง CSS ต้นฉบับของคุณทั้งหมด ไม่มีการแตะต้อง */
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: #f3f4f6;
             color: #1f2937;
         }
         
+        /* เอฟเฟกต์ช่อง Input บนหน้าจอปกติ */
         @media screen {
             input {
                 transition: all 0.2s ease-in-out;
@@ -76,7 +76,7 @@
     </div>
 
     <div class="w-full overflow-x-auto pb-8">
-        <div class="print-container mx-auto bg-white shadow-lg relative flex flex-col shrink-0" style="width: 794px; height: 1123px; padding: 56px; overflow: hidden; box-sizing: border-box; background-color: white;">
+        <div class="print-container mx-auto bg-white shadow-lg relative flex flex-col shrink-0" style="width: 794px; height: 1123px; padding: 36px 56px; overflow: hidden; box-sizing: border-box; background-color: white;">
             
             <div class="flex justify-between items-start w-full">
                 <div class="flex items-start gap-8">
@@ -94,7 +94,7 @@
                 </div>
             </div>
 
-            <div class="mt-4 mb-6 text-black text-center">
+            <div class="mt-2 mb-4 text-black text-center">
                 <h2 class="text-[28px] font-bold leading-tight">ใบกำกับภาษี / ใบเสร็จรับเงิน</h2>
                 <h3 class="text-[16px] font-bold tracking-wider mt-2 leading-tight">TAX INVOICE / RECEIPT</h3>
             </div>
@@ -139,7 +139,7 @@
                 </div>
             </div>
 
-            <table class="w-full text-sm border-collapse border-table mb-4 flex-1">
+            <table class="w-full text-sm border-collapse border-table mb-2 flex-1">
                 <thead>
                     <tr class="bg-[#FF0000] text-center font-bold text-white leading-tight">
                         <th class="w-12 py-1">ลำดับ</th>
@@ -232,7 +232,7 @@
                 </tbody>
             </table>
 
-            <div class="grid grid-cols-3 gap-8 mt-4 text-[13px] text-center text-black items-end pb-4">
+            <div class="grid grid-cols-3 gap-8 mt-2 text-[13px] text-center text-black items-end pb-2">
                 <div class="flex flex-col items-center px-2 w-full">
                     <div class="mb-3 leading-tight text-gray-800">ได้รับสินค้าตามรายการข้างต้น<br>ไว้ในสภาพเรียบร้อยถูกต้อง</div>
                     <div class="w-full relative h-10 mb-2">
@@ -428,40 +428,35 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF กลับมาใช้ html2canvas ต้นฉบับ (แก้บั๊กภาพ 1)
+            // ระบบสร้าง PDF (พร้อมระบบแก้สระภาษาไทยลอยหาย)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
                 this.innerHTML = '⏳ กำลังเตรียมไฟล์ PDF...';
                 this.disabled = true;
 
-                await document.fonts.ready;
-
                 const element = document.querySelector('.print-container');
                 const inputs = element.querySelectorAll('input');
                 const originalDisplays = [];
 
-                // แปลง Input เป็น <div> ชั่วคราว (ปลดล็อคการตัดขอบสระภาษาไทย)
+                // แปลง Input เป็น Div ที่ไม่ตัดขอบ เพื่อป้องกันสระโดนหั่น
                 inputs.forEach((input, index) => {
                     originalDisplays[index] = input.style.display;
                     const div = document.createElement('div');
                     
-                    // ดึงสไตล์เดิมมาทั้งหมด
-                    div.className = input.className + ' pdf-temp-div'; 
+                    div.className = input.className + ' pdf-temp-div px-1'; 
                     div.style.cssText = window.getComputedStyle(input).cssText;
                     
-                    // ปรับแต่งให้ <div> ไม่ตัดขอบสระ (แก้ปัญหาภาพที่ 1)
                     div.style.display = 'block';
                     div.style.width = '100%';
                     div.style.minHeight = Math.max(input.offsetHeight, 24) + 'px'; 
-                    div.style.overflow = 'visible'; // สำคัญที่สุด! ปล่อยสระลอยได้ ไม่โดนตัด
+                    div.style.overflow = 'visible'; // ปล่อยสระลอยได้ ไม่โดนตัด
                     div.style.whiteSpace = 'nowrap';
                     div.style.lineHeight = 'normal';
                     div.style.background = 'transparent';
                     div.style.border = 'none';
                     div.style.outline = 'none';
                     
-                    // รักษาสีและการจัดตำแหน่ง
                     if(input.classList.contains('text-[#0000FF]')) div.style.color = '#0000FF';
                     if(input.classList.contains('text-right')) div.style.textAlign = 'right';
                     if(input.classList.contains('text-center')) div.style.textAlign = 'center';
@@ -472,7 +467,6 @@
                 });
 
                 try {
-                    // ใช้การดึงภาพตามที่คุณเคยใช้สำเร็จ (ขนาดจะกลับมาพอดี 1 หน้า เหมือนภาพที่ 2)
                     const canvas = await html2canvas(element, { 
                         scale: 2, 
                         useCORS: true, 
@@ -486,7 +480,6 @@
                     const imgData = canvas.toDataURL('image/jpeg', 1.0);
                     const { jsPDF } = window.jspdf;
                     
-                    // ตั้งค่า PDF หน้า A4 อัตราส่วนเดิม
                     const pdf = new jsPDF('p', 'mm', 'a4'); 
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -496,7 +489,6 @@
                     const pdfBlob = pdf.output('blob');
                     const file = new File([pdfBlob], "invoice_กาหลง.pdf", { type: 'application/pdf' });
                     
-                    // แปลงกลับคืนร่างเดิมทันที
                     element.querySelectorAll('.pdf-temp-div').forEach(div => div.remove());
                     inputs.forEach((input, index) => {
                         input.style.display = originalDisplays[index];
@@ -505,7 +497,6 @@
                     this.innerHTML = originalText;
                     this.disabled = false;
 
-                    // ส่งไลน์
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
@@ -513,6 +504,7 @@
                             text: 'ส่งเอกสารใบกำกับภาษี / ใบเสร็จรับเงิน ร้านขนมเปี๊ยะกาหลง'
                         });
                     } else {
+                        alert('ระบบทำการ "ดาวน์โหลดไฟล์ PDF" ลงในเครื่องของคุณเรียบร้อยแล้ว คุณสามารถนำไฟล์นี้ไปส่งใน LINE ได้เลยครับ');
                         const url = window.URL.createObjectURL(pdfBlob);
                         const a = document.createElement('a');
                         a.style.display = 'none';
@@ -525,15 +517,16 @@
                 } catch (error) {
                     console.error('Error:', error);
                     alert('เกิดข้อผิดพลาดในการสร้างไฟล์ PDF');
+                    
                     element.querySelectorAll('.pdf-temp-div').forEach(div => div.remove());
                     inputs.forEach((input, index) => {
                         input.style.display = originalDisplays[index];
                     });
+
                     this.innerHTML = originalText;
                     this.disabled = false;
                 }
             });
-
         });
     </script>
 </body>
