@@ -6,7 +6,7 @@
     <title>ใบกำกับภาษี / ใบเสร็จรับเงิน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/big.js/6.2.1/big.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -442,7 +442,7 @@
             calculateTotal();
 
             // ==========================================
-            // ระบบสร้าง PDF
+            // ระบบสร้าง PDF (อัปเดตใหม่)
             // ==========================================
             document.getElementById('shareBtn').addEventListener('click', async function() {
                 const originalText = this.innerHTML;
@@ -456,7 +456,8 @@
                 inputs.forEach((input, index) => {
                     originalDisplays[index] = input.style.display;
                     const span = document.createElement('span');
-                    span.className = input.className + ' pdf-temp-span block truncate px-1'; 
+                    // นำคำว่า truncate ออกเพื่อไม่ให้สระโดนตัดขอบ
+                    span.className = input.className.replace('truncate', '') + ' pdf-temp-span block px-1'; 
                     span.style.cssText = input.style.cssText;
                     span.textContent = input.value;
                     input.parentNode.insertBefore(span, input);
@@ -464,17 +465,13 @@
                 });
 
                 try {
-                    const canvas = await html2canvas(element, { 
-                        scale: 3, 
-                        useCORS: true, 
-                        scrollY: 0,
-                        width: 794,
-                        height: 1123,
-                        windowWidth: 794,
-                        logging: false
+                    // ใช้ htmlToImage วาดภาพเพื่อแก้ปัญหาฟอนต์ภาษาไทยเพี้ยน
+                    const imgData = await htmlToImage.toJpeg(element, { 
+                        quality: 1.0,
+                        pixelRatio: 3, 
+                        backgroundColor: '#ffffff'
                     });
 
-                    const imgData = canvas.toDataURL('image/jpeg', 1.0);
                     const { jsPDF } = window.jspdf;
                     
                     const pdf = new jsPDF('p', 'mm', 'a4'); 
