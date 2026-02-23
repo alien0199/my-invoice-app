@@ -464,10 +464,11 @@
                     span.className = input.className.replace('w-full', '') + ' pdf-temp-span'; 
                     span.style.cssText = input.style.cssText;
                     span.style.display = 'inline-block';
-                    span.style.width = input.offsetWidth + 'px'; // ล็อคความกว้างให้ตรงตามหน้าจอจริง
-                    span.style.overflow = 'hidden';
+                    span.style.width = input.offsetWidth + 'px'; 
+                    // ลบ overflow: hidden ออก และปรับ line-height เผื่อสระภาษาไทย
                     span.style.whiteSpace = 'nowrap';
-                    span.style.padding = '0 4px';
+                    span.style.lineHeight = 'normal'; 
+                    span.style.verticalAlign = 'baseline';
                     
                     if(input.classList.contains('text-right')) span.style.textAlign = 'right';
                     if(input.classList.contains('text-center')) span.style.textAlign = 'center';
@@ -553,3 +554,4 @@
     </script>
 </body>
 </html>
+
